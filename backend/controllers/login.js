@@ -61,11 +61,15 @@ export const callback = (req, res) => {
       if (!error && response.statusCode === 200) {
         var access_token = body.access_token;
         var refresh_token = body.refresh_token;
-        res.redirect('http://localhost:3000/?'+
-        new URLSearchParams({
-          access_token: access_token,
-          refresh_token: refresh_token,
-        }));
+        var expires_in = body.expires_in;
+
+        res.redirect('http://localhost:3000/?' + 
+          new URLSearchParams({
+            access_token : access_token,
+            refresh_token : refresh_token,
+            expires_in : expires_in
+          })
+        );
       }
     });
   }
@@ -87,8 +91,10 @@ export const refreshToken = (req, res) => {
   request.post(authOptions, function(error, response, body) {
     if (!error && response.statusCode === 200) {
       var access_token = body.access_token;
+      var refresh_token = body.refresh_token;
       res.send({
-        'access_token': access_token
+        'access_token': access_token,
+        'refresh_token': refresh_token
       });
     }
   });

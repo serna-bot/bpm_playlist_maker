@@ -1,0 +1,1 @@
+//change top artists, get the config, get the profile
