@@ -1,4 +1,4 @@
-import {getToken} from './token.js';
+import {getToken} from '../shared/token.js';
 
 export const getUser = async() => {
     let token = getToken();

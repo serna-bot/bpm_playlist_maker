@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import loginRoutes from './routes/login.js';
+import userRoutes from './routes/user.js';
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(
 );
 
 app.use('/login', loginRoutes);
+app.use('/user', userRoutes);
 
 const CONNECTION_URL = 'mongodb://localhost:27017';
 const PORT = process.env.port || 4000;

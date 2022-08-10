@@ -1,6 +1,8 @@
 import Cookies from "universal-cookie";
 const cookies = new Cookies();
 
+//store expiration in local storage
+
 export const getToken = () => {
   const access_token =  cookies.get('access_token');
   const refresh_token =  cookies.get('refresh_token');
