@@ -31,7 +31,17 @@ export const register = async(req, res) => {
 };
 
 export const updateTopArtists = async(req, res) => {
-    User.findByIdAndUpdate({id : req.params.id}, {top_artists : req.body}).then((user) => {
+    let artists_by_genre = {};
+    for (const artist of req.body.list) {
+        for (const genre of artist.genres) {
+            if (!(genre in artists_by_genre)) {
+                artists_by_genre[genre] = [artist.id];
+            }
+            else artists_by_genre[genre].push(artist.id);
+        }
+    }
+    console.log('by genre', artists_by_genre);
+    User.findByIdAndUpdate(req.params.id, {top_artists : req.body.list, artists_by_genre : artists_by_genre}).then((user) => {
         if(user) {
             return res.status(200).json(user.top_artists);
         }
@@ -42,9 +52,22 @@ export const updateTopArtists = async(req, res) => {
 };
 
 export const getTopArtists = async(req, res) => {
-    User.findById({id : req.params.id}).then((user) => {
+    User.findById(req.params.id).then((user) => {
         if(user) {
-            return res.status(200).json(user.top_artists);
+            return res.status(200).json({
+                top_artists: user.top_artists});
+        }
+        else {
+            res.status(400).json({error : "User does not exist"});
+        }
+    })
+};
+
+export const getTracks = async(req, res) => {
+    User.findById(req.params.id).then((user) => {
+        if(user) {
+            return res.status(200).json({
+                tracks: user.tracks});
         }
         else {
             res.status(400).json({error : "User does not exist"});
