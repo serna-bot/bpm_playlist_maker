@@ -4,7 +4,7 @@ import User from '../models/user.js';
 const genreToArtists = async(id, genres) => {
     let list_of_artists = [];
     let genreArtists = {};
-    try{
+    try {
         const user = await User.findById(id, 'artists_by_genre');
         genreArtists = user.artists_by_genre;
         for(const genre of genres) {
