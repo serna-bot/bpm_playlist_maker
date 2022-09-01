@@ -28,6 +28,7 @@ export const updateGenres = async(req, res) => {
     const genresString = req.get('Genres');
     const genres = genresString.split(',');
     const list = await updateTracks(token, req.params.id, genres);
+    console.log("here", list);
     User.findByIdAndUpdate(req.params.id, {tracks : list}).then((user) => {
         if(user) {
             if (list === []) {
@@ -98,12 +99,10 @@ const updateTracks = async(token, id, genres) => {
         urls.push(authOptions);
     }
     let promises = urls.map(url => getJSON(url));
-    Promise.all(promises).then((responses) => {
-        console.log("shithole", responses);
-        for (const response of responses) {
-            const temp = list_of_tracks.concat(response);
-            list_of_tracks = temp;
-        }
-        return list_of_tracks;
-    })
+    const responses = await Promise.all(promises);
+    for (const response of responses) {
+        const temp = list_of_tracks.concat(response);
+        list_of_tracks = temp;
+    }
+    return list_of_tracks;
 };
