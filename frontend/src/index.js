@@ -7,6 +7,7 @@ import reportWebVitals from './reportWebVitals';
 import Homepage from './Homepage';
 import Dashboard from './Dashboard';
 import Playlists from './Dashboard/Playlists';
+import Playlist from './Dashboard/Playlists/Playlist';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -15,7 +16,8 @@ root.render(
       <Routes>
         <Route path='/' element={<Homepage />} />
         <Route path='/dashboard/:id' element={<Dashboard />} />
-        <Route path='/dashboard/create-playlists/:id' element={<Playlists />} />
+        <Route path='/dashboard/:id/create-playlists' element={<Playlists />} />
+        <Route path='/dashboard/:id/playlist' element={<Playlist />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

@@ -18,50 +18,10 @@ const genreToArtists = async(id, genres) => {
     }
     }
     catch (err) {
-        console.log("error")
+        console.log("error", err)
     }
     return list_of_artists;
-}
-
-export const updateGenres = async(req, res) => {
-    const token = req.get('Bearer');
-    const genresString = req.get('Genres');
-    const genres = genresString.split(',');
-    const list = await updateTracks(token, req.params.id, genres);
-    console.log("here", list);
-    User.findByIdAndUpdate(req.params.id, {tracks : list}).then((user) => {
-        if(user) {
-            if (list === []) {
-                res.status(409).json({error : "no tracks matching the genres provided"});
-            }
-            res.status(200).json({tracks : list});
-        }
-        else res.status(400);
-    });
-    
 };
-
-export const clearTracks = async(req, res) => {
-    User.findByIdAndUpdate(req.params.id, {tracks : []}).then((user) => {
-        if(user) {
-            res.status(200);
-        }
-        else res.status(400);
-    });
-};
-
-function doRequest(url) {
-    return (new Promise(function (resolve, reject) {
-        request.get(authOptions, function(error, response, body) {
-            if (!error && response.statusCode === 200) {
-                resolve(body);
-            }
-            else {
-                reject(error);
-            }
-        });
-    }))
-}
 
 const getJSON = async(authOptions) => {
     let list_of_tracks = [];
@@ -105,4 +65,90 @@ const updateTracks = async(token, id, genres) => {
         list_of_tracks = temp;
     }
     return list_of_tracks;
+};
+
+export const updateGenres = async(req, res) => {
+    const token = req.get('Bearer');
+    const genresString = req.get('Genres');
+    const genres = genresString.split(',');
+    const list = await updateTracks(token, req.params.id, genres);
+    User.findByIdAndUpdate(req.params.id, {tracks : list}).then((user) => {
+        if(user) {
+            if (list === []) {
+                res.status(409).json({error : "no tracks matching the genres provided"});
+            }
+            res.status(200).json({tracks : list});
+        }
+        else res.status(400);
+    });
+    
+};
+
+export const clearTracks = async(req, res) => {
+    User.findByIdAndUpdate(req.params.id, {tracks : []}).then((user) => {
+        if(user) {
+            res.status(200);
+        }
+        else res.status(400);
+    });
+};
+
+export const createPlaylist = async(req, res) => {
+    const token = req.body.token;
+    const name = req.body.name;
+    const user = await User.findById(req.params.id);
+    var authOptions1 = {
+        url: `https://api.spotify.com/v1/users/${user.spotify_id}/playlists`,
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type' : 'application/json'
+        },
+        form: JSON.stringify(
+            {
+                "name" : name,
+                "description": "New playlist description",
+                "public" : false
+            }
+        ),
+        json: true
+    };
+    const res1 = await (new Promise(function (resolve, reject) {
+        request.post(authOptions1, function(error, response, body) {
+            if (!error && response.statusCode === 201) {
+                resolve(body);
+            }
+            else {
+                reject(error);
+            }
+        });
+    }));
+    const playlist_id = res1.id;
+    let playlist = [];
+    for (const track of user.tracks) {
+        playlist.push(track.uri)
+    }
+    const p = playlist.splice(100);
+    if (p === []) {
+        p = playlist;
+    }
+    var authOptions2 = {
+        url: `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type' : 'application/json'
+        },
+        form: JSON.stringify({
+            'uris' : p
+        }),
+        json: true
+    };
+        request.post(authOptions2, function(error, response, body) {
+            if (!error && response.statusCode === 201) {
+                console.log(response);
+                res.status(200).send({success: "yay"});
+            }
+            else {
+                res.status(400).send({error : "could not create"});
+            }
+        });
 };

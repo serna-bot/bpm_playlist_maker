@@ -1,14 +1,14 @@
 //change top artists, get the config, get the profile
-import { ObjectId } from 'mongodb';
 import User from '../models/user.js';
 
 export const getProfile = async(req, res) => {
     User.findOne({email : req.query.email}).then((user) => {
         if(user) {
             return res.status(200).json({
-                id : user._id.toString(),
                 profile_image: user.profile_image,
-                display_name : user.display_name
+                display_name : user.display_name,
+                spotify_id : user.id,
+                id : user._id.toString()
             });
         }
         else {
@@ -40,7 +40,6 @@ export const updateTopArtists = async(req, res) => {
             else artists_by_genre[genre].push(artist.id);
         }
     }
-    console.log('by genre', artists_by_genre);
     User.findByIdAndUpdate(req.params.id, {top_artists : req.body.list, artists_by_genre : artists_by_genre}).then((user) => {
         if(user) {
             return res.status(200).json(user.top_artists);

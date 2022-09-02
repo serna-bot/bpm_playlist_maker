@@ -31,7 +31,7 @@ function Dashboard() {
     };
 
     const goToPlayList = () => {
-        window.location.href = `http://localhost:3000/dashboard/create-playlists/${sessionStorage.getItem('id')}`;
+        window.location.href = `http://localhost:3000/dashboard/${sessionStorage.getItem('id')}/create-playlists`;
     }
     return (
         <div>

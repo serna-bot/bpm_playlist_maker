@@ -17,7 +17,8 @@ export const getUser = async() => {
         return {
             display_name : data.display_name,
             email : data.email,
-            profile_image : data.images[0].url
+            profile_image : data.images[0].url,
+            spotify_id : data.id
         };
     }
     console.log("shit");

@@ -19,7 +19,7 @@ var generateRandomString = function (length) {
 export const login = (req, res) =>  {
 
   var state = generateRandomString(16);
-  var scope = 'user-read-private user-read-email user-read-recently-played user-top-read playlist-modify-private user-follow-read';
+  var scope = 'user-read-private user-read-email user-read-recently-played user-top-read playlist-modify-public playlist-modify-private user-follow-read';
 
   var auth_query_parameters = new URLSearchParams({
     response_type: 'code',

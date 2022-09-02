@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import {useEffect, useState } from 'react';
+import {useState } from 'react';
 import Select from 'react-select';
 import * as api from '../../api/index.js';
 import {getToken} from '../../shared/token.js';
@@ -11,6 +11,7 @@ function Playlists() {
     const [playlist, setPlaylist] = useState([]);
     const [genres, setGenres] = useState([]);
     const [loaded, setLoaded] = useState(false);
+    const [playlistName, setPlaylistName] = useState("");
     const token = getToken();
 
     const onDropdownChange = (e) => {
@@ -30,6 +31,23 @@ function Playlists() {
         console.log('here', playlist);
     };
 
+    const editOrderOfTracks = async () => {
+        //changes the position of the tracks
+    }
+
+    const createPlaylist = async () => {
+        const response = api.createPlaylist(id, 
+            {
+                "name" : playlistName,
+                "token" : token
+            }
+        );
+    };
+
+    const onNameChange = async (name) => {
+        setPlaylistName(name.target.value);
+    }
+
     return (
         <div>
             <Select 
@@ -42,14 +60,31 @@ function Playlists() {
             />
             <div>
                 {(() => {
+                        if (loaded) 
+                            return (
+                                <div>
+                                    <button onClick={loadTracks}> Update</button>
+                                    <button onClick={createPlaylist}> Create Playlist</button>
+                                    <input 
+                                        type='text' 
+                                        placeholder='Insert Playlist Name' 
+                                        value={playlistName} 
+                                        onChange={onNameChange} />
+                                </div>
+                            )
+                        else return <button onClick={loadTracks}> Submit</button>
+                })()}
+            </div>
+            <div>
+                {(() => {
                     if (loaded) return playlist.map(track => {
                         return (
                             <div>
-                                <img src = {track.album.images[0].url}></img>
+                                <img src = {track.album.images[0].url} alt = "artist_img"></img>
                                 <div>{track.name}</div>
                                 <div>
                                     {track.artists.map(artist => {
-                                        <div>{artist}</div>
+                                        return <div>{artist.name}</div>
                                     })}
                                 </div>
                             </div>
@@ -58,7 +93,6 @@ function Playlists() {
                     else return <h1>No playlist created yet.</h1>
                 })()}
             </div>
-            <button onClick={loadTracks}> Submit</button>
         </div>
     );
 };

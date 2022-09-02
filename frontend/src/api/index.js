@@ -8,3 +8,4 @@ export const registerUser = (user) => axios.post(url, user);
 export const updateTopArtists = (id, list) => axios.patch(`${url}/${id}/updateTopArtists`, {list}); 
 export const fetchTopArtists = (id) => axios.get(`${url}/${id}/getTopArtists`);
 export const updateGenres = (id, header) => axios.get(`${url2}/${id}/updateGenres`, header);
+export const createPlaylist = (id, body) => axios.post(`${url2}/${id}/createPlaylist`, body);
