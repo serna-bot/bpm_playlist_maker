@@ -93,6 +93,54 @@ export const clearTracks = async(req, res) => {
     });
 };
 
+const splitPlaylist = async(token, playlist_id, tracks) => {
+    let clone_tracks = [...tracks];
+    console.log(clone_tracks.length);
+    let tracks_split = [];
+    let length = clone_tracks.length;
+    const num_requests = Math.floor(length/100);
+    for (let i = 0; i < num_requests; i++) {
+        const index = length - 100;
+        let temp = clone_tracks.splice(index);
+        console.log("blash", temp.length);
+        length -= 100;
+        tracks_split.push(temp);
+    }
+    if (clone_tracks.length > 0) {
+        tracks_split.push(clone_tracks);
+    }
+    let requests = [];
+    for (const track_list of tracks_split) {
+        var authOptions = {
+            url: `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type' : 'application/json'
+            },
+            form: JSON.stringify({
+                'uris' : track_list
+            }),
+            json: true
+        };
+        requests.push(authOptions);
+    }
+    return requests;
+};
+
+const postJSON = async(authOptions) => {
+    await (new Promise(function (resolve, reject) {
+        request.post(authOptions, function(error, response, body) {
+            if (!error && response.statusCode === 201) {
+                resolve(body);
+            }
+            else {
+                console.log("failed in adding tracks", response);
+                reject(error);
+            }
+        });
+    }));
+};
+
 export const createPlaylist = async(req, res) => {
     const token = req.body.token;
     const name = req.body.name;
@@ -115,6 +163,7 @@ export const createPlaylist = async(req, res) => {
     const res1 = await (new Promise(function (resolve, reject) {
         request.post(authOptions1, function(error, response, body) {
             if (!error && response.statusCode === 201) {
+                console.log("created playlist");
                 resolve(body);
             }
             else {
@@ -127,28 +176,10 @@ export const createPlaylist = async(req, res) => {
     for (const track of user.tracks) {
         playlist.push(track.uri)
     }
-    const p = playlist.splice(100);
-    if (p === []) {
-        p = playlist;
-    }
-    var authOptions2 = {
-        url: `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type' : 'application/json'
-        },
-        form: JSON.stringify({
-            'uris' : p
-        }),
-        json: true
-    };
-        request.post(authOptions2, function(error, response, body) {
-            if (!error && response.statusCode === 201) {
-                console.log(response);
-                res.status(200).send({success: "yay"});
-            }
-            else {
-                res.status(400).send({error : "could not create"});
-            }
-        });
+    const urls = await splitPlaylist(token, playlist_id, playlist);
+    let promises = urls.map(url => postJSON(url));
+    Promise.all(promises).then (data => {
+        console.log("done");
+        res.status(200).send({success: "yay"});
+    });
 };
